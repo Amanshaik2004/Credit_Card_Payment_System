@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:transactions_transaction_changelist' %}">Transactions</a>
+&rsaquo; Daily Payment Summary
+</div>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <h1>Daily Payment Summary Dashboard</h1>
+    <p>Comprehensive overview of transaction volumes, revenue, success rates, and failure statistics grouped by date.</p>
+</div>
+
+<div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px; background: #28a745; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">Total Success Volume</h3>
+        <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0 0;">${{ total_success_volume|floatformat:2 }}</p>
+    </div>
+    <div style="flex: 1; min-width: 200px; background: #007bff; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">Total Transactions</h3>
+        <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0 0;">{{ overall_total_count }}</p>
+    </div>
+    <div style="flex: 1; min-width: 200px; background: #17a2b8; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">Successful Payments</h3>
+        <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0 0;">{{ overall_success_count }}</p>
+    </div>
+    <div style="flex: 1; min-width: 200px; background: #dc3545; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">Failed Payments</h3>
+        <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0 0;">{{ overall_failed_count }}</p>
+    </div>
+    <div style="flex: 1; min-width: 200px; background: #ffc107; color: #333; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">Pending Payments</h3>
+        <p style="font-size: 28px; font-weight: bold; margin: 10px 0 0 0;">{{ overall_pending_count }}</p>
+    </div>
+</div>
+
+<div class="module" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+    <h2 style="padding: 15px 20px; margin: 0; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+        Daily Breakdown
+    </h2>
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: #f1f3f5; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px 20px;">Date</th>
+                <th style="padding: 12px 20px;">Total Transactions</th>
+                <th style="padding: 12px 20px;">Successful</th>
+                <th style="padding: 12px 20px;">Failed</th>
+                <th style="padding: 12px 20px;">Pending</th>
+                <th style="padding: 12px 20px;">Total Volume ($)</th>
+                <th style="padding: 12px 20px;">Success Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in daily_rows %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 20px; font-weight: 600;">{{ row.date }}</td>
+                <td style="padding: 12px 20px;">{{ row.total_count }}</td>
+                <td style="padding: 12px 20px; color: #28a745; font-weight: 600;">{{ row.success_count }}</td>
+                <td style="padding: 12px 20px; color: #dc3545; font-weight: 600;">{{ row.failed_count }}</td>
+                <td style="padding: 12px 20px; color: #e67e22; font-weight: 600;">{{ row.pending_count }}</td>
+                <td style="padding: 12px 20px; font-weight: 600;">${{ row.total_amount|floatformat:2 }}</td>
+                <td style="padding: 12px 20px;">
+                    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; 
+                        background: {% if row.success_rate >= 80 %}#d4edda; color: #155724;{% elif row.success_rate >= 50 %}#fff3cd; color: #856404;{% else %}#f8d7da; color: #721c24;{% endif %}">
+                        {{ row.success_rate|floatformat:1 }}%
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="padding: 30px; text-align: center; color: #888;">
+                    No transactions recorded yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top: 25px;">
+    <a href="{% url 'admin:transactions_transaction_changelist' %}" class="button" style="padding: 10px 20px; background: #79aec8; color: white; border-radius: 4px; text-decoration: none;">&larr; Back to Transactions List</a>
+</div>
+{% endblock %}
